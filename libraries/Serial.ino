@@ -16,8 +16,7 @@
 #include <stdlib.h>
 
 // Bibliotecas locais
-#include "../lib/Serial.hpp"
-#include "../lib/Timer.hpp"
+#include "./Timer.h"
 
 
 /////////////////////////////// MACROS ////////////////////////////////////////
