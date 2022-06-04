@@ -4,7 +4,7 @@
 #define BAUD_RATE 1
 #define HALF_BAUD 1000/(2*BAUD_RATE)
 
-#include "Temporizador.h"
+#include "../lib/Temporizador.h"
 
 // Calcula bit de paridade - Par ou impar
 bool bitParidade(char dado){

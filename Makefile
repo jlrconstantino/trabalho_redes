@@ -5,7 +5,7 @@ RM = rm -f
 CFLAGS = -Wall -Wextra
 BIN = arduino
 ZIP = arduino.zip
-OBJ = obj/Serial.o
+OBJ = obj/Serial.o obj/Temporizador.o
 LIB = lib/Temporizador.hpp
 
 # ------------------- # --- DIRETIVAS PRINCIPAIS --- # -------------------- #
@@ -37,3 +37,6 @@ clean:
 
 obj/Serial.o: src/Serial.cpp $(LIB)
 	$(CPP) -c src/Serial.cpp -o obj/Serial.o $(CFLAGS)
+
+obj/Temporizador.o: src/Temporizador.cpp lib/Temporizador.hpp
+	$(CPP) -c src/Temporizador.cpp -o obj/Temporizador.o $(CFLAGS)
