@@ -1,6 +1,34 @@
-#include "../lib/Temporizador.hpp"
+//////////////////////////////// INFO /////////////////////////////////////////
+/*
+*
+* Biblioteca com funcionalidades de temporização do Arduíno.
+*
+* Autores: 
+* Erick Patrick Andrade Barcelos
+* Karoliny Oliveira Ozias Silva
+* João Lucas Rodrigues Constantino
+*
+*/
+///////////////////////////// IMPORTAÇÕES /////////////////////////////////////
 
-void configuraTemporizador(int baud_rate){
+// Bibliotecas-padrão
+#include <stdio.h>
+#include <stdlib.h>
+
+// Bibliotecas locais
+#include "../lib/Timer.hpp"
+
+/////////////////////////////// MACROS ////////////////////////////////////////
+
+
+
+/////////////////////////// TIPOS DEFINIDOS ///////////////////////////////////
+
+
+
+/////////////////////////////// FUNÇÕES ///////////////////////////////////////
+
+void set_timer(int baud_rate){
   int frequencia;
   frequencia = constrain(baud_rate,1,1500);
   //set timer1 interrupt
@@ -18,7 +46,7 @@ void configuraTemporizador(int baud_rate){
   TIFR1 = 0;
 }
 
-void iniciaTemporizador(){
+void start_timer(){
   Serial.println("T1 iniciado");
   TCNT1 = 0;//initialize counter value to 0
   TIFR1 = 0;
@@ -28,7 +56,7 @@ void iniciaTemporizador(){
   TCCR1B |= (1 << CS12) | (1 << CS10);
 }
 
-void paraTemporizador(){
+void stop_timer(){
   Serial.println("T1 parado");
     // Turn T1 off
   TCCR1B &= 0xF8;

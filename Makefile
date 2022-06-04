@@ -5,8 +5,8 @@ RM = rm -f
 CFLAGS = -Wall -Wextra
 BIN = arduino
 ZIP = arduino.zip
-OBJ = obj/Serial.o obj/Temporizador.o
-LIB = lib/Temporizador.hpp
+OBJ = obj/Serial.o obj/Timer.o
+LIB = lib/Timer.hpp lib/Serial.hpp
 
 # ------------------- # --- DIRETIVAS PRINCIPAIS --- # -------------------- #
 
@@ -35,8 +35,8 @@ clean:
 
 # ----------------------- # --- OBJETIFICAÇÃO --- # ------------------------ #
 
-obj/Serial.o: src/Serial.cpp $(LIB)
+obj/Serial.o: src/Serial.cpp lib/Serial.hpp lib/Timer.hpp
 	$(CPP) -c src/Serial.cpp -o obj/Serial.o $(CFLAGS)
 
-obj/Temporizador.o: src/Temporizador.cpp lib/Temporizador.hpp
-	$(CPP) -c src/Temporizador.cpp -o obj/Temporizador.o $(CFLAGS)
+obj/Timer.o: src/Timer.cpp lib/Timer.hpp
+	$(CPP) -c src/Timer.cpp -o obj/Timer.o $(CFLAGS)
