@@ -20,6 +20,8 @@
 // Pinos
 #define PIN_RX 13
 #define PIN_TX 13
+#define PIN_CTS 12
+#define PIN_RTS 11
 
 // Baud rate
 #define BAUD_RATE 1
@@ -31,66 +33,41 @@
 
 /////////////////////////// VARIÁVEIS GLOBAIS /////////////////////////////////
 
-// String para guardar mensagem
-String msg = "";
+// Dados recebidos via comunicação
+int bit_received;
+char byte_received = 0;
+int parity_received;
 
-// Byte recebido para comunicação
-char byte_received;
-
-// Usado para verificar se está atualmente em conexão
+// Controle lógico
 bool connected = false;
-bool first_iteration = true;
+int bit_iterator = -1;
 
 
 ////////////////////////// FUNÇÕES AUXILIARES /////////////////////////////////
 
 // Calcula bit de paridade - Par ou impar
-char get_parity_bit(String message, bool is_odd){
+int get_parity_bit(char data, bool is_odd){
 
   // Conta a quantia de 1's
-  int count = 0, len = message.length();
-  char byte;
-  for(int i = 0; i < len; ++i){
-    byte = message[i];
-  	while(byte){
-	    count += byte & 1;
-	    byte >>= 1;
-  	}
+  int count = 0;
+  for(int i = 0; i < 8; ++i){
+    count += bitRead(data, i);
   }
 
   // Ímpar
   if(is_odd){
     if(count % 2 == 0){
-      return '1';
+      return HIGH;
     }
-    return '0';
+    return LOW;
   }
 
   // Par
   else {
     if(count % 2 == 0){
-      return '0';
+      return LOW;
     }
-    return '1';
-  }
-}
-
-
-// Imprime, na saída Serial, uma string em formato binário
-void print_string_as_binary(String message){
-  int i, len = message.length() - 1;
-  for(i=0; i<len; ++i){
-    Serial.print(message[i], BIN);
-  }
-  Serial.println(message[i], BIN);
-}
-
-
-
-// Limpeza de serial
-void clear_serial(){
-  while(Serial.available() > 0) {
-    char t = Serial.read();
+    return HIGH;
   }
 }
 
@@ -110,6 +87,11 @@ void setup(){
   // Inicializa TX ou RX
   pinMode(PIN_RX, INPUT);
   
+  // RTS e CTS
+  pinMode(PIN_CTS, OUTPUT);
+  digitalWrite(PIN_CTS, LOW);
+  pinMode(PIN_RTS, INPUT);
+  
   // Configura timer
   set_timer(BAUD_RATE);
   
@@ -121,10 +103,11 @@ void setup(){
 void loop ( ) {
   
   // Verifica se há conexão e se há mensagem
-  if(connected == false && Serial.available() > 0){
+  if(connected == false && digitalRead(PIN_RTS) == HIGH){
     
     // Comunicação (CTS)
     Serial.println("CTS");
+    digitalWrite(PIN_CTS, HIGH);
     connected = true;
     delay(HALF_BAUD);
     start_timer();
@@ -136,63 +119,65 @@ void loop ( ) {
 // Rotina de interrupcao do timer1
 // O que fazer toda vez que 1s passou?
 ISR(TIMER1_COMPA_vect){
-	
-  // Sincronização
-  if(first_iteration == false){
   
-    // Leitura caractere a caractere
-    byte_received = Serial.read();
-    Serial.print("Byte received: ");
-    Serial.println(byte_received);
+  // Bit de inicialização (ignorado)
+  if(bit_iterator == -1){
+    bit_iterator = 0;
+  }
+  
+  // Executa se o RTS ainda estiver definido
+  else if(digitalRead(PIN_RTS) == HIGH){
+    
+    // Itera ao longo dos bits a serem recebidos
+    if(bit_iterator < 8){
+      
+      // Bit atual
+      bit_received = digitalRead(PIN_RX);
+      bitWrite(byte_received, bit_iterator, bit_received);
+      Serial.write(bit_received + 48);
+      
+      // Incremento do iterador
+      ++bit_iterator;
+    }
 
-    // Verificação de término de mensagemm
-    if(byte_received < 0){
+    // Bit de paridade
+    else if(bit_iterator < 9){
       
-      // Encerra o timer
-      stop_timer();
+      // Bit atual
+      bit_received = digitalRead(PIN_RX);
       
-      // Bit de paridade
-      char received_parity_bit = msg[msg.length() - 1];
-      msg[msg.length() - 1] = '\0';
-      char expected_parity_bit = get_parity_bit(msg, IS_ODD);
+      // Início da mensagem a ser impressa
+      Serial.print(" (");
+      Serial.print(byte_received);
       
-      // Verificação de bit de paridade
-      if(received_parity_bit == expected_parity_bit){
-        Serial.print("Parity bit is correct. Expected and received ");
-        Serial.print(expected_parity_bit);
-		if(IS_ODD){
-          Serial.println(". (ODD PARITY)");
-		}else{
-          Serial.println(". (EVEN PARITY)");
-		}
+      // Verificação de paridade
+      if(get_parity_bit(byte_received, IS_ODD) == bit_received){
+        Serial.print("). Parity is correct: expected and received ");
+        Serial.print(bit_received);
       }else{
-        Serial.print("Parity bit is incorrect. Expected ");
-        Serial.print(expected_parity_bit);
+        Serial.print("). Parity is INCORRECT: expected ");
+        Serial.print(bit_received);
         Serial.print(", but received ");
-        Serial.print(received_parity_bit);
-		if(IS_ODD){
-          Serial.println(" instead. (ODD PARITY)");
-		}else{
-          Serial.println(" instead. (EVEN PARITY)");
-		}
+        Serial.print(!bit_received);
       }
       
-      // Visualização da mensagem
-      Serial.print("Received message: ");
-      Serial.println(msg);
-      Serial.print("As binary: ");
-      print_string_as_binary(msg);
+      // Final da mensagem a ser impressa
+      Serial.println(".");
+      
+      // Incremento do iterador
+      ++bit_iterator;
     }
-	
-	// Concatenação do caractere recebido à mensagem
-	else{
-      msg.concat(byte_received);
+    
+    // Bit terminador
+    else{
+      bit_iterator = -1;
     }
   }
   
-  // Limpeza do Serial e liberação da leitura
+  // Finaliza a conexão
   else{
-    clear_serial();
-    first_iteration = false;
+    digitalWrite(PIN_CTS, LOW);
+    stop_timer();
+    connected = false;
   }
 }
