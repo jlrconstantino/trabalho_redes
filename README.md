@@ -13,3 +13,6 @@ O grupo assume a tarefa de recepção com paridade ímpar.
 No código fonte, há um exemplar do emissor, que pode ser utilizado para testar o receptor. Para tanto, pode-se utilizar a virtualização de circuitos por meio do website [Tinkercad](https://www.tinkercad.com); nesse caso, construa um circuito como mostrado abaixo: ![circuit](./media/circuit.png)
 
 Na seção de código, adicione os códigos de emissão e de recepção aos respectivos Arduinos; em cada caso, adicione também o conteúdo de Timer.h ao código para importação manual de suas funcionalidades.
+
+## Apresentação da Simulação
+![Simulação](./media/presentation.mp4)
