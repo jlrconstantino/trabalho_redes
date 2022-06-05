@@ -156,9 +156,9 @@ ISR(TIMER1_COMPA_vect){
         Serial.print(bit_received);
       }else{
         Serial.print("). Parity is INCORRECT: expected ");
-        Serial.print(bit_received);
-        Serial.print(", but received ");
         Serial.print(!bit_received);
+        Serial.print(", but received ");
+        Serial.print(bit_received);
       }
       
       // Final da mensagem a ser impressa
