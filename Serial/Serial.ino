@@ -158,13 +158,23 @@ ISR(TIMER1_COMPA_vect){
       
       // Verificação de bit de paridade
       if(received_parity_bit == expected_parity_bit){
-        Serial.println("Parity bit is correct.");
+        Serial.print("Parity bit is correct. Expected and received ");
+        Serial.print(expected_parity_bit);
+		if(IS_ODD){
+          Serial.println(". (ODD PARITY)");
+		}else{
+          Serial.println(". (EVEN PARITY)");
+		}
       }else{
         Serial.print("Parity bit is incorrect. Expected ");
         Serial.print(expected_parity_bit);
         Serial.print(", but received ");
         Serial.print(received_parity_bit);
-        Serial.println(" instead.");
+		if(IS_ODD){
+          Serial.println(" instead. (ODD PARITY)");
+		}else{
+          Serial.println(" instead. (EVEN PARITY)");
+		}
       }
       
       // Visualização da mensagem
