@@ -133,7 +133,7 @@ ISR(TIMER1_COMPA_vect){
       
       // Bit atual
       bit_received = digitalRead(PIN_RX);
-      bitWrite(byte_received, bit_iterator, bit_received);
+      bitWrite(byte_received, bit_iterator, 7-bit_received);
       Serial.write(bit_received + 48);
       
       // Incremento do iterador

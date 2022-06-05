@@ -105,7 +105,7 @@ ISR(TIMER1_COMPA_vect){
     
     // Itera ao longo dos bits
     else if(bit_iterator < 8){
-      digitalWrite(PIN_TX, bitRead(msg[char_iterator], bit_iterator));
+      digitalWrite(PIN_TX, bitRead(msg[char_iterator], 7-bit_iterator));
       ++bit_iterator;
     }
     
