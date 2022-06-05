@@ -61,17 +61,17 @@ char get_parity_bit(String message, bool is_odd){
   // Ímpar
   if(is_odd){
     if(count % 2 == 0){
-      return '0';
+      return '1';
     }
-    return '1';
+    return '0';
   }
 
   // Par
   else {
     if(count % 2 == 0){
-      return '1';
+      return '0';
     }
-    return '0';
+    return '1';
   }
 }
 
