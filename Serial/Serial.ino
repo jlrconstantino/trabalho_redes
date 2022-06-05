@@ -1,7 +1,7 @@
 //////////////////////////////// INFO /////////////////////////////////////////
 /*
 *
-* Implementação das funcionalidades de controle do Arduíno.
+* Implementação das funcionalidades de controle do Arduino.
 *
 * Autores: 
 * Erick Patrick Andrade Barcelos
@@ -28,28 +28,34 @@
 // Paridade
 #define IS_ODD true
 
+
 /////////////////////////// VARIÁVEIS GLOBAIS /////////////////////////////////
 
 // String para guardar mensagem
-String msg;
+String msg = "";
 
 // Byte recebido para comunicação
 char byte_received;
 
 // Usado para verificar se está atualmente em conexão
 bool connected = false;
-bool first_iteraction = true;
+bool first_iteration = true;
 
-/////////////////////////////// FUNÇÕES ///////////////////////////////////////
+
+////////////////////////// FUNÇÕES AUXILIARES /////////////////////////////////
 
 // Calcula bit de paridade - Par ou impar
-char get_parity_bit(char data, bool is_odd){
+char get_parity_bit(String message, bool is_odd){
 
   // Conta a quantia de 1's
-  int count = 0;
-  while(data){
-    count += data & 1;
-    data >>= 1;
+  int count = 0, len = message.length();
+  char byte;
+  for(int i = 0; i < len; ++i){
+    byte = message[i];
+  	while(byte){
+	    count += byte & 1;
+	    byte >>= 1;
+  	}
   }
 
   // Ímpar
@@ -69,27 +75,17 @@ char get_parity_bit(char data, bool is_odd){
   }
 }
 
-// Rotina de interrupcao do timer1
-// O que fazer toda vez que 1s passou?
-ISR(TIMER1_COMPA_vect){
-  if(first_iteraction == false){
-  
-    // Leitura de um caractere
-    byte_received = Serial.read();
 
-    Serial.print("Byte received: ");
-    Serial.println(byte_received);
-
-    // Verificação de término de mensagemm
-    if(byte_received < 0){
-      stop_timer();
-    }
+// Imprime, na saída Serial, uma string em formato binário
+void print_string_as_binary(String message){
+  int i, len = message.length() - 1;
+  for(i=0; i<len; ++i){
+    Serial.print(message[i], BIN);
   }
-  else{
-    clear_serial();
-    first_iteraction = false;
-  }
+  Serial.println(message[i], BIN);
 }
+
+
 
 // Limpeza de serial
 void clear_serial(){
@@ -97,6 +93,10 @@ void clear_serial(){
     char t = Serial.read();
   }
 }
+
+
+////////////////////// CHAMADAS-PADRÃO DO ARDUINO /////////////////////////////
+
 
 // Executada uma vez quando o Arduino reseta
 void setup(){
@@ -126,6 +126,63 @@ void loop ( ) {
     // Comunicação (CTS)
     Serial.println("CTS");
     connected = true;
+    delay(HALF_BAUD);
     start_timer();
+  }
+}
+
+/////////////////////// LÓGICA DE SINCRONIZAÇÃO ///////////////////////////////
+
+// Rotina de interrupcao do timer1
+// O que fazer toda vez que 1s passou?
+ISR(TIMER1_COMPA_vect){
+	
+  // Sincronização
+  if(first_iteration == false){
+  
+    // Leitura caractere a caractere
+    byte_received = Serial.read();
+    Serial.print("Byte received: ");
+    Serial.println(byte_received);
+
+    // Verificação de término de mensagemm
+    if(byte_received < 0){
+      
+      // Encerra o timer
+      stop_timer();
+      
+      // Bit de paridade
+      char received_parity_bit = msg[msg.length() - 1];
+      msg[msg.length() - 1] = '\0';
+      char expected_parity_bit = get_parity_bit(msg, IS_ODD);
+      
+      // Verificação de bit de paridade
+      if(received_parity_bit == expected_parity_bit){
+        Serial.println("Parity bit is correct.");
+      }else{
+        Serial.print("Parity bit is incorrect. Expected ");
+        Serial.print(expected_parity_bit);
+        Serial.print(", but received ");
+        Serial.print(received_parity_bit);
+        Serial.println(" instead.");
+      }
+      
+      // Visualização da mensagem
+      Serial.print("Received message: ");
+      Serial.println(msg);
+      Serial.print("As binary: ");
+      print_string_as_binary(msg);
+    }
+	
+	// Concatenação do caractere recebido à mensagem
+	else{
+      msg.concat(byte_received);
+    }
+  }
+  
+  // Limpeza do Serial e liberação da leitura
+  else{
+    clear_serial();
+    first_iteration = false;
   }
 }

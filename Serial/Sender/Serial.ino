@@ -20,7 +20,7 @@ void set_timer(int baud_rate){
 }
 
 void start_timer(){
-  Serial.println("T1 iniciado");
+  Serial.println("T1 started");
   TCNT1 = 0;//initialize counter value to 0
   TIFR1 = 0;
   // enable timer compare interrupt
@@ -30,15 +30,11 @@ void start_timer(){
 }
 
 void stop_timer(){
-  Serial.println("T1 parado");
+  Serial.println("T1 stopped");
     // Turn T1 off
   TCCR1B &= 0xF8;
   TIMSK1 = 0;
 }
-
-
-
-
 
 // Pinos
 #define PIN_RX 13
@@ -52,7 +48,7 @@ void stop_timer(){
 #define IS_ODD true
 
 // String para guardar a mensagem
-String msg = "Salutations!";
+String msg = "Hello";
 
 // Para percorrer a string
 int iterator = 0;
@@ -61,15 +57,20 @@ int msg_length = msg.length();
 // Usado para verificar se está atualmente em conexão
 bool connected = false;
 bool msg_sent = false;
+bool first_iteration = true;
 
 // Calcula bit de paridade - Par ou impar
-char get_parity_bit(char data, bool is_odd){
+char get_parity_bit(String message, bool is_odd){
 
   // Conta a quantia de 1's
-  int count = 0;
-  while(data){
-    count += data & 1;
-    data >>= 1;
+  int count = 0, len = message.length();
+  char byte;
+  for(int i = 0; i < len; ++i){
+    byte = message[i];
+  	while(byte){
+	    count += byte & 1;
+	    byte >>= 1;
+  	}
   }
 
   // Ímpar
@@ -92,18 +93,22 @@ char get_parity_bit(char data, bool is_odd){
 // Rotina de interrupcao do timer1
 // O que fazer toda vez que 1s passou?
 ISR(TIMER1_COMPA_vect){
-  
-  // Envio de um caractere
-  if(iterator < msg_length){
-    Serial.write(msg[iterator]);
-    ++iterator;
-  }
-  
-  // Finalização da conexão
-  else{
-    Serial.write(-1);
-    iterator = 0;
-  	stop_timer();
+  if(first_iteration == false){
+    // Envio de um caractere
+    if(iterator < msg_length){
+      Serial.write(msg[iterator]);
+      ++iterator;
+    }
+
+    // Finalização da conexão
+    else{
+      Serial.write(get_parity_bit(msg, IS_ODD));
+      Serial.write(-1);
+      iterator = 0;
+      stop_timer();
+    }
+  }else{
+    first_iteration = false;
   }
 }
 
@@ -145,7 +150,7 @@ void loop ( ) {
   // Estabelecimento de conexão
   else if(connected == false && Serial.available() > 0){ 
     connected = true;
-    clear_serial();
     start_timer();
+    Serial.flush();
   }
 }

@@ -4,11 +4,12 @@
 //////////////////////////////// INFO /////////////////////////////////////////
 /*
 *
-* Biblioteca com funcionalidades de temporização do Arduíno.
+* Biblioteca com funcionalidades de temporização do Arduino.
 *
 */
 ///////////////////////////// ASSINATURAS /////////////////////////////////////
 
+// Define o timer
 void set_timer(int baud_rate){
   int frequencia;
   frequencia = constrain(baud_rate,1,1500);
@@ -27,8 +28,10 @@ void set_timer(int baud_rate){
   TIFR1 = 0;
 }
 
+
+// Inicializa o timer
 void start_timer(){
-  Serial.println("T1 iniciado");
+  Serial.println("T1 started");
   TCNT1 = 0;//initialize counter value to 0
   TIFR1 = 0;
   // enable timer compare interrupt
@@ -37,12 +40,15 @@ void start_timer(){
   TCCR1B |= (1 << CS12) | (1 << CS10);
 }
 
+
+// Interrompe o timer
 void stop_timer(){
-  Serial.println("T1 parado");
+  Serial.println("T1 stopped");
     // Turn T1 off
   TCCR1B &= 0xF8;
   TIMSK1 = 0;
 }
+
 
 ///////////////////////////////////////////////////////////////////////////////
 
