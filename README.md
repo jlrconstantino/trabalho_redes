@@ -15,6 +15,4 @@ No código fonte, há um exemplar do emissor, que pode ser utilizado para testar
 Na seção de código, adicione os códigos de emissão e de recepção aos respectivos Arduinos; em cada caso, adicione também o conteúdo de Timer.h ao código para importação manual de suas funcionalidades.
 
 ## Apresentação da Simulação
-<video width="1280" height="720" controls>
-  <source src="./media/presentation.mp4" type="video/mp4">
-</video>
+![video](./media/presentation.mp4)
