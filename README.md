@@ -16,4 +16,5 @@ Na seção de código, adicione os códigos de emissão e de recepção aos resp
 
 ## Gravações
 [Apresentação dos dois grupos (emissor e receptor).](./media/presentation.mp4)
+
 [Apresentação da simulação no Tinkercad.](./media/simulation.mp4)
