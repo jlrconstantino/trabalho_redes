@@ -2,9 +2,9 @@
 Trabalho prático realizado para a disciplina de Redes de Computadores, SSC0142, durante o primeiro semestre letivo de 2022.
 
 ## Integrantes
-- Erick Patrick Andrade Barcelos
-- Karoliny Oliveira Ozias Silva
-- João Lucas Rodrigues Constantino
+- Erick Patrick Andrade Barcelos, 11345562
+- Karoliny Oliveira Ozias Silva, 10368020
+- João Lucas Rodrigues Constantino, 11795763
 
 ## Especificações
 O grupo assume a tarefa de recepção com paridade ímpar.
