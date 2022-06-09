@@ -121,18 +121,23 @@ void loop ( ) {
 ISR(TIMER1_COMPA_vect){
   
   // Bit de inicialização (ignorado)
-  if(bit_iterator == -1){
-    bit_iterator = 0;
+  if(bit_iterator == -1 && digitalRead(PIN_RTS) == HIGH){
+    bit_received = digitalRead(PIN_RX);
+    if(bit_received == HIGH){
+      bit_iterator = 0;
+    }
   }
   
   // Executa se o RTS ainda estiver definido
   else if(digitalRead(PIN_RTS) == HIGH){
+
+     // Bit recebido
+    bit_received = digitalRead(PIN_RX);
     
     // Itera ao longo dos bits a serem recebidos
     if(bit_iterator < 8){
       
       // Bit atual
-      bit_received = digitalRead(PIN_RX);
       bitWrite(byte_received, 7-bit_iterator, bit_received);
       Serial.write(bit_received + 48);
       
@@ -142,8 +147,8 @@ ISR(TIMER1_COMPA_vect){
 
     // Bit de paridade
     else if(bit_iterator < 9){
-      
-      // Bit atual
+
+      // Bit recebido
       bit_received = digitalRead(PIN_RX);
       
       // Início da mensagem a ser impressa
